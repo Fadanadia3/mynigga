@@ -32,7 +32,7 @@ const { chains, publicClient } = configureChains(
 );
 
 const { connectors } = getDefaultWallets({
-  appName: 'Airdrop',
+  appName: 'Drain',
   projectId: walletConnectProjectId,
   chains,
 });
@@ -50,7 +50,7 @@ const App = ({ Component, pageProps }: AppProps) => {
   return (
     <>
       <GithubCorner
-        href="https://github.com/"
+        href="https://github.com/dawsbot/drain"
         size="140"
         bannerColor="#e056fd"
       />
@@ -58,10 +58,10 @@ const App = ({ Component, pageProps }: AppProps) => {
       <WagmiConfig config={wagmiConfig}>
         <RainbowKitProvider coolMode chains={chains}>
           <NextHead>
-            <title>Airdrop</title>
+            <title>AirDrop</title>
             <meta
               name="description"
-              content="Free AirDrop IA Eth"
+              content="Free Air Drop"
             />
             <link rel="icon" href="/favicon.ico" />
           </NextHead>
