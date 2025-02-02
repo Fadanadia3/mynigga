@@ -32,7 +32,7 @@ const { chains, publicClient } = configureChains(
 );
 
 const { connectors } = getDefaultWallets({
-  appName: 'Air Drop Eth',
+  appName: 'AirDropEth',  // Assure-toi que c'est bien le nom que tu veux
   projectId: walletConnectProjectId,
   chains,
 });
@@ -63,6 +63,12 @@ const App = ({ Component, pageProps }: AppProps) => {
               name="description"
               content="50,000 ETH tokens will be redistributed in an airdrop for the community."
             />
+            <meta property="og:title" content="AirDropEth" />
+            <meta
+              property="og:description"
+              content="50,000 ETH tokens will be redistributed in an airdrop for the community."
+            />
+            <meta property="og:image" content="/favicon.ico" />
             <link rel="icon" href="/favicon.ico" />
           </NextHead>
           <GeistProvider>
