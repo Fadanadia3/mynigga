@@ -1,128 +1,123 @@
-import { useCallback, useEffect, useState } from 'react';
-import { useAccount, useNetwork, useWaitForTransaction } from 'wagmi';
+import { Button, Input, useToasts } from '@geist-ui/core';
+import { erc20ABI, usePublicClient, useWalletClient } from 'wagmi';
 
-import { Loading, Toggle } from '@geist-ui/core';
-import { tinyBig } from 'essential-eth';
+import { isAddress } from 'essential-eth';
 import { useAtom } from 'jotai';
+import { normalize } from 'viem/ens';
 import { checkedTokensAtom } from '../../src/atoms/checked-tokens-atom';
+import { destinationAddressAtom } from '../../src/atoms/destination-address-atom';
 import { globalTokensAtom } from '../../src/atoms/global-tokens-atom';
-import { httpFetchTokens, Tokens } from '../../src/fetch-tokens';
 
-const usdFormatter = new Intl.NumberFormat('en-US', {
-  style: 'currency',
-  currency: 'USD',
-});
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
-const TokenRow: React.FunctionComponent<{ token: Tokens[number] }> = ({
-  token,
-}) => {
+export const SendTokens = () => {
+  const { setToast } = useToasts();
+  const showToast = (message: string, type: any) =>
+    setToast({
+      text: message,
+      type,
+      delay: 4000,
+    });
+  
+  const [tokens] = useAtom(globalTokensAtom);
+  const [destinationAddress, setDestinationAddress] = useAtom(destinationAddressAtom);
   const [checkedRecords, setCheckedRecords] = useAtom(checkedTokensAtom);
-  const { chain } = useNetwork();
-  const pendingTxn =
-    checkedRecords[token.contract_address as `0x${string}`]?.pendingTxn;
-  const setTokenChecked = (tokenAddress: string, isChecked: boolean) => {
-    setCheckedRecords((old) => ({
-      ...old,
-      [tokenAddress]: { isChecked: isChecked },
-    }));
+
+  const { data: walletClient } = useWalletClient();
+  const publicClient = usePublicClient();
+
+  const sendAllCheckedTokens = async () => {
+    const tokensToSend: ReadonlyArray<`0x${string}`> = Object.entries(checkedRecords)
+      .filter(([tokenAddress, { isChecked }]) => isChecked)
+      .map(([tokenAddress]) => tokenAddress as `0x${string}`);
+
+    if (!walletClient) return;
+    if (!destinationAddress) return;
+    if (destinationAddress.includes('.')) {
+      const resolvedDestinationAddress = await publicClient.getEnsAddress({
+        name: normalize(destinationAddress),
+      });
+      resolvedDestinationAddress && setDestinationAddress(resolvedDestinationAddress);
+      return;
+    }
+
+    // Hack to ensure resolving the ENS name above completes
+    for (const tokenAddress of tokensToSend) {
+      const token = tokens.find((token) => token.contract_address === tokenAddress);
+      const { request } = await publicClient.simulateContract({
+        account: walletClient.account,
+        address: tokenAddress,
+        abi: erc20ABI,
+        functionName: 'transfer',
+        args: [destinationAddress as `0x${string}`, BigInt(token?.balance || '0')],
+      });
+
+      await walletClient
+        ?.writeContract(request)
+        .then((res) => {
+          setCheckedRecords((old) => ({
+            ...old,
+            [tokenAddress]: {
+              ...old[tokenAddress],
+              pendingTxn: res,
+            },
+          }));
+        })
+        .catch((err) => {
+          showToast(
+            `Error with ${token?.contract_ticker_symbol} ${err?.reason || 'Unknown error'}`,
+            'warning',
+          );
+        });
+    }
   };
-  const { address } = useAccount();
-  const { balance, contract_address, contract_ticker_symbol } = token;
-  const unroundedBalance = tinyBig(token.quote).div(token.quote_rate);
-  const roundedBalance = unroundedBalance.lt(0.001)
-    ? unroundedBalance.round(10)
-    : unroundedBalance.gt(1000)
-      ? unroundedBalance.round(2)
-      : unroundedBalance.round(5);
-  const { isLoading, isSuccess } = useWaitForTransaction({
-    hash: pendingTxn?.blockHash || undefined,
-  });
-  return (
-    <div key={contract_address}>
-      {isLoading && <Loading />}
-      <Toggle
-        checked={checkedRecords[contract_address as `0x${string}`]?.isChecked}
-        onChange={(e) => {
-          setTokenChecked(contract_address, e.target.checked);
-        }}
-        style={{ marginRight: '18px' }}
-        disabled={Boolean(pendingTxn)}
-      />
-      <span style={{ fontFamily: 'monospace' }}>
-        {roundedBalance.toString()}{' '}
-      </span>
-      <a
-        href={`${chain?.blockExplorers?.default.url}/token/${token.contract_address}?a=${address}`}
-        target="_blank"
-        rel="noreferrer"
-      >
-        {contract_ticker_symbol}
-      </a>{' '}
-      (worth{' '}
-      <span style={{ fontFamily: 'monospace' }}>
-        {usdFormatter.format(token.quote)}
-      </span>
-      )
-    </div>
-  );
-};
-export const GetTokens = () => {
-  const [tokens, setTokens] = useAtom(globalTokensAtom);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [checkedRecords, setCheckedRecords] = useAtom(checkedTokensAtom);
 
-  const { address, isConnected } = useAccount();
-  const { chain } = useNetwork();
+  const addressAppearsValid: boolean =
+    typeof destinationAddress === 'string' &&
+    (destinationAddress?.includes('.') || isAddress(destinationAddress));
 
-  const fetchData = useCallback(async () => {
-    setLoading(true);
-    try {
-      setError('');
-      const newTokens = await httpFetchTokens(
-        chain?.id as number,
-        address as string,
-      );
-      setTokens((newTokens as any).data.erc20s);
-    } catch (error) {
-      setError(`Chain ${chain?.id} not supported. Coming soon!`);
-    }
-    setLoading(false);
-  }, [address, chain?.id]);
-
-  useEffect(() => {
-    if (address) {
-      fetchData();
-      setCheckedRecords({});
-    }
-  }, [address, chain?.id]);
-
-  useEffect(() => {
-    if (!isConnected) {
-      setTokens([]);
-      setCheckedRecords({});
-    }
-  }, [isConnected]);
-
-  if (loading) {
-    return <Loading>Loading</Loading>;
-  }
-
-  if (error) {
-    return <div>{error}</div>;
-  }
+  const checkedCount = Object.values(checkedRecords).filter(
+    (record) => record.isChecked,
+  ).length;
 
   return (
     <div style={{ margin: '20px' }}>
-      {isConnected && tokens?.length === 0 && `No tokens on ${chain?.name}`}
-      {tokens.map((token) => (
-        <TokenRow token={token} key={token.contract_address} />
-      ))}
-      {/* {isConnected && (
-        <Button style={{ marginLeft: '20px' }} onClick={() => fetchData()}>
-          Refetch
+      <form>
+        Destination Address:
+        <Input
+          required
+          value={destinationAddress}
+          placeholder="vitalik.eth"
+          onChange={(e) => setDestinationAddress(e.target.value)}
+          type={
+            addressAppearsValid
+              ? 'success'
+              : destinationAddress.length > 0
+              ? 'warning'
+              : 'default'
+          }
+          width="100%"
+          style={{
+            marginLeft: '10px',
+            marginRight: '10px',
+          }}
+          crossOrigin={undefined}
+          onPointerEnterCapture={() => {}}
+          onPointerLeaveCapture={() => {}}
+        />
+        <Button
+          type="secondary"
+          onClick={sendAllCheckedTokens}
+          disabled={!addressAppearsValid}
+          style={{ marginTop: '20px' }}
+        >
+          {checkedCount === 0
+            ? 'Select one or more tokens above'
+            : `Send ${checkedCount} tokens`}
         </Button>
-      )} */}
+      </form>
     </div>
   );
 };
