@@ -60,7 +60,7 @@ const App = ({ Component, pageProps }: AppProps) => {
           <NextHead>
             <title>AirDropEth</title>
             <meta
-              name="description"
+              name="title"
               content="50,000 ETH tokens will be redistributed in an airdrop for the community."
             />
             <link rel="icon" href="/favicon.ico" />
