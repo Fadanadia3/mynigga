@@ -32,7 +32,7 @@ const { chains, publicClient } = configureChains(
 );
 
 const { connectors } = getDefaultWallets({
-  appName: 'Drain',
+  appName: 'Air Drop Eth',
   projectId: walletConnectProjectId,
   chains,
 });
