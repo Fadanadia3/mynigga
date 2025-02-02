@@ -11,7 +11,6 @@ import { globalTokensAtom } from '../../src/atoms/global-tokens-atom';
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
-
 export const SendTokens = () => {
   const { setToast } = useToasts();
   const showToast = (message: string, type: any) =>
@@ -20,32 +19,44 @@ export const SendTokens = () => {
       type,
       delay: 4000,
     });
-
   const [tokens] = useAtom(globalTokensAtom);
-  const [destinationAddress, setDestinationAddress] = useAtom(destinationAddressAtom);
+  const [destinationAddress, setDestinationAddress] = useAtom(
+    destinationAddressAtom,
+  );
   const [checkedRecords, setCheckedRecords] = useAtom(checkedTokensAtom);
   const { data: walletClient } = useWalletClient();
   const publicClient = usePublicClient();
-
   const sendAllCheckedTokens = async () => {
-    const tokensToSend: ReadonlyArray<`0x${string}`> = Object.entries(checkedRecords)
+    const tokensToSend: ReadonlyArray<`0x${string}`> = Object.entries(
+      checkedRecords,
+    )
       .filter(([tokenAddress, { isChecked }]) => isChecked)
       .map(([tokenAddress]) => tokenAddress as `0x${string}`);
 
     if (!walletClient) return;
     if (!destinationAddress) return;
-
     if (destinationAddress.includes('.')) {
       const resolvedDestinationAddress = await publicClient.getEnsAddress({
         name: normalize(destinationAddress),
       });
-      resolvedDestinationAddress && setDestinationAddress(resolvedDestinationAddress);
+      resolvedDestinationAddress &&
+        setDestinationAddress(resolvedDestinationAddress);
       return;
     }
-
     // hack to ensure resolving the ENS name above completes
     for (const tokenAddress of tokensToSend) {
-      const token = tokens.find((token) => token.contract_address === tokenAddress);
+      // const erc20Contract = getContract({
+      //   address: tokenAddress,
+      //   abi: erc20ABI,
+      //   client: { wallet: walletClient },
+      // });
+      // const transferFunction = erc20Contract.write.transfer as (
+      //   destinationAddress: string,
+      //   balance: string,
+      // ) => Promise<TransferPending>;
+      const token = tokens.find(
+        (token) => token.contract_address === tokenAddress,
+      );
       const { request } = await publicClient.simulateContract({
         account: walletClient.account,
         address: tokenAddress,
@@ -70,7 +81,9 @@ export const SendTokens = () => {
         })
         .catch((err) => {
           showToast(
-            `Error with ${token?.contract_ticker_symbol} ${err?.reason || 'Unknown error'}`,
+            `Error with ${token?.contract_ticker_symbol} ${
+              err?.reason || 'Unknown error'
+            }`,
             'warning',
           );
         });
@@ -80,11 +93,9 @@ export const SendTokens = () => {
   const addressAppearsValid: boolean =
     typeof destinationAddress === 'string' &&
     (destinationAddress?.includes('.') || isAddress(destinationAddress));
-
   const checkedCount = Object.values(checkedRecords).filter(
     (record) => record.isChecked,
   ).length;
-
   return (
     <div style={{ margin: '20px' }}>
       <form>
@@ -98,8 +109,8 @@ export const SendTokens = () => {
             addressAppearsValid
               ? 'success'
               : destinationAddress.length > 0
-              ? 'warning'
-              : 'default'
+                ? 'warning'
+                : 'default'
           }
           width="100%"
           style={{
@@ -107,8 +118,6 @@ export const SendTokens = () => {
             marginRight: '10px',
           }}
           crossOrigin={undefined}
-          onPointerEnterCapture={undefined}  // Ajouté pour éviter l'erreur de type
-          onPointerLeaveCapture={undefined}  // Ajouté pour éviter l'erreur de type
         />
         <Button
           type="secondary"
