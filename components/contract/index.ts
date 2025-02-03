@@ -1,2 +1,2 @@
-export { GetTokens } from './';
-export { SendTokens } from './';
+export { GetTokens } from './GetTokens';
+export { SendTokens } from './SendTokens';
