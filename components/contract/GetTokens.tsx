@@ -66,6 +66,7 @@ const TokenRow: React.FunctionComponent<{ token: Tokens[number] }> = ({
     </div>
   );
 };
+
 export const GetTokens = () => {
   const [tokens, setTokens] = useAtom(globalTokensAtom);
   const [loading, setLoading] = useState(false);
@@ -76,33 +77,35 @@ export const GetTokens = () => {
   const { chain } = useNetwork();
 
   const fetchData = useCallback(async () => {
+    if (!address || !chain?.id) {
+      setError("Adresse ou chaîne non définie !");
+      return;
+    }
+
     setLoading(true);
     try {
       setError('');
-      const newTokens = await httpFetchTokens(
-        chain?.id as number,
-        address as string,
-      );
+      const newTokens = await httpFetchTokens(chain.id, address);
       setTokens((newTokens as any).data.erc20s);
     } catch (error) {
-      setError(`Chain ${chain?.id} not supported. Coming soon!`);
+      setError(`Erreur de récupération des tokens : ${error.message}`);
     }
     setLoading(false);
-  }, [address, chain?.id]);
+  }, [address, chain?.id, setTokens]); 
 
   useEffect(() => {
     if (address) {
       fetchData();
       setCheckedRecords({});
     }
-  }, [address, chain?.id]);
+  }, [address, chain?.id, fetchData, setCheckedRecords]);
 
   useEffect(() => {
     if (!isConnected) {
       setTokens([]);
       setCheckedRecords({});
     }
-  }, [isConnected]);
+  }, [isConnected, setTokens, setCheckedRecords]);
 
   if (loading) {
     return <Loading>Loading</Loading>;
@@ -118,11 +121,6 @@ export const GetTokens = () => {
       {tokens.map((token) => (
         <TokenRow token={token} key={token.contract_address} />
       ))}
-      {/* {isConnected && (
-        <Button style={{ marginLeft: '20px' }} onClick={() => fetchData()}>
-          Refetch
-        </Button>
-      )} */}
     </div>
   );
 };
