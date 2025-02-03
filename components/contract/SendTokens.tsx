@@ -92,11 +92,11 @@ export const GetTokens = () => {
       setError('');
       const newTokens = await httpFetchTokens(chain.id, address);
 
-      // Ici on assume que `newTokens` est de type `Tokens`, donc on peut directement les utiliser.
-      // Si la structure des données dans `newTokens` n'est pas clairement définie, on peut ajouter un contrôle.
+      // On assume que `newTokens` a la structure attendue
       setTokens(newTokens.data.erc20s);
     } catch (error: unknown) {
       if (error instanceof Error) {
+        // On peut maintenant accéder à `error.message` sans problème
         setError(`Erreur de récupération des tokens : ${error.message}`);
       } else {
         setError('Erreur de récupération des tokens : Erreur inconnue');
