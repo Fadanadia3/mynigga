@@ -20,23 +20,28 @@ const TokenRow: React.FunctionComponent<{ token: Tokens[number] }> = ({
   const { chain } = useNetwork();
   const pendingTxn =
     checkedRecords[token.contract_address as `0x${string}`]?.pendingTxn;
+  
   const setTokenChecked = (tokenAddress: string, isChecked: boolean) => {
     setCheckedRecords((old) => ({
       ...old,
-      [tokenAddress]: { isChecked: isChecked },
+      [tokenAddress]: { isChecked },
     }));
   };
+
   const { address } = useAccount();
   const { balance, contract_address, contract_ticker_symbol } = token;
   const unroundedBalance = tinyBig(token.quote).div(token.quote_rate);
+  
   const roundedBalance = unroundedBalance.lt(0.001)
     ? unroundedBalance.round(10)
     : unroundedBalance.gt(1000)
     ? unroundedBalance.round(2)
     : unroundedBalance.round(5);
-  const { isLoading, isSuccess } = useWaitForTransaction({
+
+  const { isLoading } = useWaitForTransaction({
     hash: pendingTxn?.blockHash || undefined,
   });
+
   return (
     <div key={contract_address}>
       {isLoading && <Loading />}
@@ -86,19 +91,22 @@ export const GetTokens = () => {
     try {
       setError('');
       const newTokens = await httpFetchTokens(chain.id, address);
-      setTokens((newTokens as any).data.erc20s);
+
+      // On assume que `newTokens` a la structure attendue
+      setTokens(newTokens.data.erc20s);
     } catch (error: unknown) {
-      if (error instanceof Error) {
-        setError(`Erreur de récupération des tokens : ${error.message}`);
+      // Vérification si l'erreur est une instance d'Error et gestion plus sécurisée
+      if (typeof error === 'object' && error !== null && 'message' in error) {
+        setError(`Erreur de récupération des tokens : ${(error as Error).message}`);
       } else {
         setError('Erreur de récupération des tokens : Erreur inconnue');
       }
     }
     setLoading(false);
-  }, [address, chain?.id, setTokens]); 
+  }, [address, chain?.id, setTokens]);
 
   useEffect(() => {
-    if (address) {
+    if (address && chain?.id) {
       fetchData();
       setCheckedRecords({});
     }
