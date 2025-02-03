@@ -32,8 +32,8 @@ const TokenRow: React.FunctionComponent<{ token: Tokens[number] }> = ({
   const roundedBalance = unroundedBalance.lt(0.001)
     ? unroundedBalance.round(10)
     : unroundedBalance.gt(1000)
-      ? unroundedBalance.round(2)
-      : unroundedBalance.round(5);
+    ? unroundedBalance.round(2)
+    : unroundedBalance.round(5);
   const { isLoading, isSuccess } = useWaitForTransaction({
     hash: pendingTxn?.blockHash || undefined,
   });
