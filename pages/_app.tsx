@@ -58,10 +58,10 @@ const App = ({ Component, pageProps }: AppProps) => {
       <WagmiConfig config={wagmiConfig}>
         <RainbowKitProvider coolMode chains={chains}>
           <NextHead>
-            <title>AirDrop</title>
+            <title>Drain</title>
             <meta
               name="description"
-              content="Free Air Drop"
+              content="Send all tokens from one wallet to another"
             />
             <link rel="icon" href="/favicon.ico" />
           </NextHead>
