@@ -87,8 +87,12 @@ export const GetTokens = () => {
       setError('');
       const newTokens = await httpFetchTokens(chain.id, address);
       setTokens((newTokens as any).data.erc20s);
-    } catch (error) {
-      setError(`Erreur de récupération des tokens : ${error.message}`);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        setError(`Erreur de récupération des tokens : ${error.message}`);
+      } else {
+        setError('Erreur de récupération des tokens : Erreur inconnue');
+      }
     }
     setLoading(false);
   }, [address, chain?.id, setTokens]); 
