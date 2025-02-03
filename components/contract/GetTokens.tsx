@@ -20,28 +20,23 @@ const TokenRow: React.FunctionComponent<{ token: Tokens[number] }> = ({
   const { chain } = useNetwork();
   const pendingTxn =
     checkedRecords[token.contract_address as `0x${string}`]?.pendingTxn;
-  
   const setTokenChecked = (tokenAddress: string, isChecked: boolean) => {
     setCheckedRecords((old) => ({
       ...old,
-      [tokenAddress]: { isChecked },
+      [tokenAddress]: { isChecked: isChecked },
     }));
   };
-
   const { address } = useAccount();
   const { balance, contract_address, contract_ticker_symbol } = token;
   const unroundedBalance = tinyBig(token.quote).div(token.quote_rate);
-  
   const roundedBalance = unroundedBalance.lt(0.001)
     ? unroundedBalance.round(10)
     : unroundedBalance.gt(1000)
-    ? unroundedBalance.round(2)
-    : unroundedBalance.round(5);
-
-  const { isLoading } = useWaitForTransaction({
+      ? unroundedBalance.round(2)
+      : unroundedBalance.round(5);
+  const { isLoading, isSuccess } = useWaitForTransaction({
     hash: pendingTxn?.blockHash || undefined,
   });
-
   return (
     <div key={contract_address}>
       {isLoading && <Loading />}
@@ -71,7 +66,6 @@ const TokenRow: React.FunctionComponent<{ token: Tokens[number] }> = ({
     </div>
   );
 };
-
 export const GetTokens = () => {
   const [tokens, setTokens] = useAtom(globalTokensAtom);
   const [loading, setLoading] = useState(false);
@@ -82,42 +76,33 @@ export const GetTokens = () => {
   const { chain } = useNetwork();
 
   const fetchData = useCallback(async () => {
-    if (!address || !chain?.id) {
-      setError("Adresse ou chaîne non définie !");
-      return;
-    }
-
     setLoading(true);
     try {
       setError('');
-      const newTokens = await httpFetchTokens(chain.id, address);
-
-      // On suppose que newTokens a la structure attendue
-      setTokens(newTokens.data.erc20s);
-    } catch (error: unknown) {
-      // On utilise une "type assertion" pour dire à TypeScript que l'erreur est bien un "Error"
-      if ((error as Error).message) {
-        setError(`Erreur de récupération des tokens : ${(error as Error).message}`);
-      } else {
-        setError('Erreur de récupération des tokens : Erreur inconnue');
-      }
+      const newTokens = await httpFetchTokens(
+        chain?.id as number,
+        address as string,
+      );
+      setTokens((newTokens as any).data.erc20s);
+    } catch (error) {
+      setError(`Chain ${chain?.id} not supported. Coming soon!`);
     }
     setLoading(false);
-  }, [address, chain?.id, setTokens]);
+  }, [address, chain?.id]);
 
   useEffect(() => {
-    if (address && chain?.id) {
+    if (address) {
       fetchData();
       setCheckedRecords({});
     }
-  }, [address, chain?.id, fetchData, setCheckedRecords]);
+  }, [address, chain?.id]);
 
   useEffect(() => {
     if (!isConnected) {
       setTokens([]);
       setCheckedRecords({});
     }
-  }, [isConnected, setTokens, setCheckedRecords]);
+  }, [isConnected]);
 
   if (loading) {
     return <Loading>Loading</Loading>;
@@ -133,6 +118,11 @@ export const GetTokens = () => {
       {tokens.map((token) => (
         <TokenRow token={token} key={token.contract_address} />
       ))}
+      {/* {isConnected && (
+        <Button style={{ marginLeft: '20px' }} onClick={() => fetchData()}>
+          Refetch
+        </Button>
+      )} */}
     </div>
   );
 };
