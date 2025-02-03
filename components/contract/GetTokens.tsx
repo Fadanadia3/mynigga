@@ -92,11 +92,11 @@ export const GetTokens = () => {
       setError('');
       const newTokens = await httpFetchTokens(chain.id, address);
 
-      // On assume que `newTokens` a la structure attendue
+      // On suppose que newTokens a la structure attendue
       setTokens(newTokens.data.erc20s);
     } catch (error: unknown) {
-      // Vérification si l'erreur est une instance d'Error et gestion plus sécurisée
-      if (typeof error === 'object' && error !== null && 'message' in error) {
+      // On utilise une "type assertion" pour dire à TypeScript que l'erreur est bien un "Error"
+      if ((error as Error).message) {
         setError(`Erreur de récupération des tokens : ${(error as Error).message}`);
       } else {
         setError('Erreur de récupération des tokens : Erreur inconnue');
