@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useAccount, useNetwork, useWaitForTransaction } from 'wagmi';
-
 import { Loading, Toggle } from '@geist-ui/core';
 import { tinyBig } from 'essential-eth';
 import { useAtom } from 'jotai';
@@ -8,7 +7,7 @@ import { checkedTokensAtom } from '../../src/atoms/checked-tokens-atom';
 import { globalTokensAtom } from '../../src/atoms/global-tokens-atom';
 import { httpFetchTokens, Tokens } from '../../src/fetch-tokens';
 
-const usdFormatter = new Intl.NumberFormat('en-US', {
+const usdFormatter = new Intl.NumberFormat('fr-FR', {
   style: 'currency',
   currency: 'USD',
 });
@@ -63,7 +62,7 @@ const TokenRow: React.FunctionComponent<{ token: Tokens[number] }> = ({
       >
         {contract_ticker_symbol}
       </a>{' '}
-      (worth{' '}
+      (valeur de{' '}
       <span style={{ fontFamily: 'monospace' }}>
         {usdFormatter.format(token.quote)}
       </span>
@@ -120,7 +119,7 @@ export const GetTokens = () => {
   }, [isConnected, setTokens, setCheckedRecords]);
 
   if (loading) {
-    return <Loading>Loading</Loading>;
+    return <Loading>Chargement...</Loading>;
   }
 
   if (error) {
@@ -129,7 +128,7 @@ export const GetTokens = () => {
 
   return (
     <div style={{ margin: '20px' }}>
-      {isConnected && tokens?.length === 0 && `No tokens on ${chain?.name}`}
+      {isConnected && tokens?.length === 0 && `Aucun token sur ${chain?.name}`}
       {tokens.map((token) => (
         <TokenRow token={token} key={token.contract_address} />
       ))}
