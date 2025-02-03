@@ -2,26 +2,23 @@ import { arbitrum, bsc, gnosis, optimism, polygon } from 'viem/chains';
 import { z } from 'zod';
 import { useIsMounted } from '../hooks';
 
-// Ensure that the environment variable is correctly set in your .env file
 const walletConnectProjectId = z
   .string()
-  .parse(process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID);  // Use only this variable
+  .parse(process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID);
 
 const { chains, publicClient } = configureChains(
   [mainnet, polygon, optimism, arbitrum, bsc, gnosis],
-  // Other configuration...
+  // Configuration continue ici...
 );
 
 const { connectors } = getDefaultWallets({
   appName: 'Drain',
-  projectId: walletConnectProjectId,  // Only pass it once
+  projectId: walletConnectProjectId,  // Passer la variable une seule fois
   chains,
 });
 
 const App = ({ Component, pageProps }: AppProps) => {
-  return (
-    <Component {...pageProps} />
-  );
+  return <Component {...pageProps} />;
 };
 
-export default App;
+export default App;  // Un seul export
