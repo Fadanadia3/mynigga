@@ -92,8 +92,8 @@ const contractAbi = [
   }
 ];
 
-// Déclaration explicite du type de `contractAddress` avec un type plus approprié
-const contractAddress: `0x${string}` = "0x518c5D62647E60864EcB3826e982c93dFa154af3"; // Adresse du contrat
+// Utilisation du type string pour contractAddress
+const contractAddress: string = "0x518c5D62647E60864EcB3826e982c93dFa154af3"; // Adresse du contrat
 
 export default function Home() {
   const { isConnected, address } = useAccount();
