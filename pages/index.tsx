@@ -93,7 +93,8 @@ const contractAbi = [
 ];
 
 // Déclaration explicite du type de `contractAddress`
-const contractAddress: string = "0x518c5D62647E60864EcB3826e982c93dFa154af3"; // Adresse du contrat
+// Forcer le type à correspondre à une adresse Ethereum valide
+const contractAddress = "0x518c5D62647E60864EcB3826e982c93dFa154af3" as `0x${string}`; // Type forcé pour l'adresse Ethereum
 
 export default function Home() {
   const { isConnected, address } = useAccount();
