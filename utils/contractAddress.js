@@ -1,3 +1,3 @@
-// utils/contractAddress.js
-const contractAddress = "0x518c5D62647E60864EcB3826e982c93dFa154af3";
+// utils/contractAddress.ts
+const contractAddress: string = "0xb44de2566da86c8cef673899d0b53fa69bd685cf"; // Adresse du contrat
 export default contractAddress;
