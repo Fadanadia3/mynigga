@@ -1,6 +1,5 @@
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useAccount, useContractRead, useContractWrite } from "wagmi";
-import { ethers } from "ethers";
 
 // ABI du contrat
 const contractAbi = [
@@ -97,7 +96,6 @@ const contractAddress = "0x518c5D62647E60864EcB3826e982c93dFa154af3"; // Adresse
 
 export default function Home() {
   const { isConnected, address } = useAccount();
-  const { data: signer } = useAccount(); // Remplacer useSigner() par useAccount()
 
   // Lire le owner du contrat (exemple d'utilisation de useContractRead)
   const { data: owner } = useContractRead({
