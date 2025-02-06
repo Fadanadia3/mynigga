@@ -1,7 +1,7 @@
 // index.tsx
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useAccount, useContractRead, useContractWrite } from "wagmi";
-import { contractAddress } from "../utils/contractAddress"; // Import du fichier depuis utils
+import contractAddress from "../utils/contractAddress"; // Importation par défaut
 
 // ABI du contrat
 const contractAbi = [
