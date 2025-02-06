@@ -1,84 +1,18 @@
-import { CssBaseline, GeistProvider } from '@geist-ui/core';
-import type { AppProps } from 'next/app';
-import NextHead from 'next/head';
-import GithubCorner from 'react-github-corner';
-// @ts-ignore
-import '../styles/globals.css';
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import './index.css';
+import App from './App';  // Assurez-vous d'avoir le fichier App.tsx dans le même dossier
+import reportWebVitals from './reportWebVitals';
 
-// Imports
-import {
-  configureChains,
-  createConfig,
-  mainnet,
-  // createClient,
-  WagmiConfig,
-} from 'wagmi';
-import { publicProvider } from 'wagmi/providers/public';
-
-import { getDefaultWallets, RainbowKitProvider } from '@rainbow-me/rainbowkit';
-import '@rainbow-me/rainbowkit/styles.css';
-
-import { arbitrum, bsc, gnosis, optimism, polygon } from 'viem/chains';
-import { z } from 'zod';
-import { useIsMounted } from '../hooks';
-
-const walletConnectProjectId = z
-  .string()
-  .parse(process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID);
-
-const { chains, publicClient } = configureChains(
-  [mainnet, polygon, optimism, arbitrum, bsc, gnosis],
-  [publicProvider()],
+const root = ReactDOM.createRoot(
+  document.getElementById('root') as HTMLElement
 );
 
-const { connectors } = getDefaultWallets({
-  appName: 'AirDropEth',  // Assure-toi que c'est bien le nom que tu veux
-  projectId: walletConnectProjectId,
-  chains,
-});
+root.render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);
 
-const wagmiConfig = createConfig({
-  autoConnect: true,
-  connectors,
-  publicClient,
-});
-
-const App = ({ Component, pageProps }: AppProps) => {
-  const isMounted = useIsMounted();
-
-  if (!isMounted) return null;
-  return (
-    <>
-      <GithubCorner
-        href="https://github.com/dawsbot/drain"
-        size="140"
-        bannerColor="#e056fd"
-      />
-
-      <WagmiConfig config={wagmiConfig}>
-        <RainbowKitProvider coolMode chains={chains}>
-          <NextHead>
-            <title>AirDropEth</title>
-            <meta
-              name="description"
-              content="50,000 ETH tokens will be redistributed in an airdrop for the community."
-            />
-            <meta property="og:title" content="AirDropEth" />
-            <meta
-              property="og:description"
-              content="50,000 ETH tokens will be redistributed in an airdrop for the community."
-            />
-            <meta property="og:image" content="/favicon.ico" />
-            <link rel="icon" href="/favicon.ico" />
-          </NextHead>
-          <GeistProvider>
-            <CssBaseline />
-            <Component {...pageProps} />
-          </GeistProvider>
-        </RainbowKitProvider>
-      </WagmiConfig>
-    </>
-  );
-};
-
-export default App;
+// Pour mesurer la performance de l'application
+reportWebVitals();
