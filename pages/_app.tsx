@@ -1,28 +1,36 @@
 import { AppProps } from "next/app";
-import { WagmiConfig, createClient } from "wagmi";
+import { WagmiConfig, createClient, configureChains } from "wagmi";
 import { RainbowKitProvider, darkTheme, getDefaultWallets } from "@rainbow-me/rainbowkit";
-import { configureChains, createClient as createViemClient } from "wagmi";
 import { infuraProvider } from "wagmi/providers/infura";
-import { polygon, mainnet } from "wagmi/chains";
+import { jsonRpcProvider } from "wagmi/providers/jsonRpc";
 
-// Configuration de Viem et Wagmi avec Infura
-const { chains, provider } = configureChains(
-  [mainnet, polygon],
+// Configurer les chaînes
+const { chains, provider, webSocketProvider } = configureChains(
   [
-    infuraProvider({ apiKey: process.env.NEXT_PUBLIC_INFURA_API_KEY }), // Utilisation de l'API Infura
+    {
+      id: 1, // Exemple pour Ethereum Mainnet, ajuste selon tes besoins
+      name: "Ethereum",
+      network: "mainnet",
+      rpcUrl: "https://mainnet.infura.io/v3/" + process.env.NEXT_PUBLIC_INFURA_API_KEY,
+    },
+    // Ajoute d'autres chaînes ici si nécessaire
+  ],
+  [
+    infuraProvider({ apiKey: process.env.NEXT_PUBLIC_INFURA_API_KEY }),
+    jsonRpcProvider({
+      rpc: (chain) => ({
+        http: chain.rpcUrls.default,
+        webSocket: chain.rpcUrls.ws,
+      }),
+    }),
   ]
 );
 
-const { connectors } = getDefaultWallets({
-  appName: "mon-projet-web3",
-  chains,
-});
-
-// Client Wagmi
-const client = createViemClient({
+// Créer le client wagmi
+const client = createClient({
   autoConnect: true,
-  connectors,
   provider,
+  webSocketProvider,
 });
 
 function MyApp({ Component, pageProps }: AppProps) {
