@@ -8,24 +8,25 @@ import '../styles/globals.css';
 // Imports
 import {
   configureChains,
-  createClient,
+  createConfig,
   WagmiConfig,
+  mainnet,
 } from 'wagmi';
 import { publicProvider } from 'wagmi/providers/public';
 
 import { getDefaultWallets, RainbowKitProvider } from '@rainbow-me/rainbowkit';
 import '@rainbow-me/rainbowkit/styles.css';
 
-import { arbitrum, bsc, gnosis, optimism, polygon, mainnet } from 'viem/chains';
+import { arbitrum, bsc, gnosis, optimism, polygon } from 'viem/chains';
 import { z } from 'zod';
 import { useIsMounted } from '../hooks';
 
-// Ensure that the environment variable is correctly set in your .env file
+// Vérification de l'environnement
 const walletConnectProjectId = z
   .string()
   .parse(process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID);
 
-const { chains, provider } = configureChains(
+const { chains, publicClient } = configureChains(
   [mainnet, polygon, optimism, arbitrum, bsc, gnosis],
   [publicProvider()],
 );
@@ -36,11 +37,10 @@ const { connectors } = getDefaultWallets({
   chains,
 });
 
-// Création du client wagmi avec la bonne syntaxe
-const wagmiClient = createClient({
+const wagmiConfig = createConfig({
   autoConnect: true,
   connectors,
-  provider,
+  publicClient,
 });
 
 const App = ({ Component, pageProps }: AppProps) => {
@@ -56,7 +56,7 @@ const App = ({ Component, pageProps }: AppProps) => {
         bannerColor="#e056fd"
       />
 
-      <WagmiConfig client={wagmiClient}>
+      <WagmiConfig config={wagmiConfig}>
         <RainbowKitProvider coolMode chains={chains}>
           <NextHead>
             <title>AirDrop</title>
